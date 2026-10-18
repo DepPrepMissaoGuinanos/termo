@@ -116,6 +116,7 @@
     <button type="button" class="link" id="clear">Limpar assinatura</button>
 
     <p id="error" role="alert"></p>
+    <p id="wait" role="status" hidden style="color: var(--muted); margin: 8px 0;">A enviar… isto pode demorar até 20 segundos. Não feches esta página.</p>
     <div class="actions">
       <button type="button" class="secondary" id="back">Corrigir dados</button>
       <button type="button" id="submit">Assinar e submeter</button>
@@ -448,8 +449,10 @@
     btn.disabled = true;
     $('back').disabled = true;
     btn.textContent = 'A enviar…';
+    $('wait').hidden = false;
 
     function fail(msg) {
+      $('wait').hidden = true;
       btn.disabled = false;
       $('back').disabled = false;
       btn.textContent = 'Assinar e submeter';
