@@ -483,7 +483,7 @@
       NOME_COMPLETO: 'Teste Voluntário Silva', DATA_NASCIMENTO: '2000-05-10', CONTACTO: '912 345 678',
       EMAIL: CFG.EMAIL_TESTE || $('form').elements.EMAIL.value.trim(), CURSO: 'Teste - Universidade de Lisboa', CE_CONTACTO: '934 567 890',
       CE_NOME: 'Maria Silva - Mãe', MORADA: 'Rua de Teste, 1', CODIGO_POSTAL: '1000-001', NIF: '123456789',
-      CC: '12345678', PASSAPORTE: 'CD123456', PASSAPORTE_VALIDADE: y + BOOT.limites.passaporteMin.slice(4)
+      CC: '12345678', UTENTE_SNS: '123456789', PASSAPORTE: 'CD123456', PASSAPORTE_VALIDADE: y + BOOT.limites.passaporteMin.slice(4)
     };
     show(1);
     BOOT.fields.forEach(function (f) { if (fake[f.key] !== undefined) el(f).value = fake[f.key]; showFieldError(f, ''); });
