@@ -62,6 +62,11 @@
   .actions { display: flex; gap: 12px; margin-top: 8px; }
   .actions .secondary { flex: 0 0 38%; }
   #error { color: var(--error); font-weight: 600; min-height: 1.5em; margin: 8px 0; }
+  #progress { margin: 4px 0 14px; }
+  .pbar { height: 10px; border-radius: 10px; background: var(--line); overflow: hidden; }
+  .pbar span { display: block; height: 100%; width: 0; border-radius: 10px; background: linear-gradient(90deg, var(--rust), var(--peach)); transition: width .3s ease; }
+  #pstep { margin: 8px 0 0; font-weight: 600; color: var(--ink); }
+  .pnote { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
 
   #loading { text-align: center; padding: 40px 0; color: var(--muted); }
   #step3 { text-align: center; padding-top: 24px; }
@@ -116,7 +121,11 @@
     <button type="button" class="link" id="clear">Limpar assinatura</button>
 
     <p id="error" role="alert"></p>
-    <p id="wait" role="status" hidden style="color: var(--muted); margin: 8px 0;">A enviar… isto pode demorar até 20 segundos. Não feches esta página.</p>
+    <div id="progress" hidden>
+      <div class="pbar" role="progressbar" aria-label="Progresso do envio" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="pfill"></span></div>
+      <p id="pstep" role="status">A guardar os teus dados…</p>
+      <p class="pnote">Pode demorar até 20 segundos. Não feches esta página.</p>
+    </div>
     <div class="actions">
       <button type="button" class="secondary" id="back">Corrigir dados</button>
       <button type="button" id="submit">Assinar e submeter</button>
@@ -449,10 +458,10 @@
     btn.disabled = true;
     $('back').disabled = true;
     btn.textContent = 'A enviar…';
-    $('wait').hidden = false;
+    startProgress();
 
     function fail(msg) {
-      $('wait').hidden = true;
+      stopProgress(false);
       btn.disabled = false;
       $('back').disabled = false;
       btn.textContent = 'Assinar e submeter';
@@ -470,10 +479,41 @@
         if (!res.ok) return fail(res.error);
         $('emailNote').textContent = BOOT.enviarEmail ? 'Vais receber uma cópia do termo em ' + payload.EMAIL + '.' : '';
         $('testbar').hidden = true;
-        show(3);
+        stopProgress(true);
+        setTimeout(function () { show(3); }, 450);
       })
       .catch(function () { fail(); });
   });
+
+  // ---------- Progress bar (estimated: the server does not report its steps) ----------
+  let progTimer = null;
+  const STEPS = [[0, 'A guardar os teus dados…'], [3, 'A preparar o termo com a tua assinatura…'],
+    [8, 'A gerar o PDF…'], [14, 'A enviar o e-mail com a tua cópia…'], [20, 'Quase pronto…']];
+
+  function setProgress(pct) {
+    $('pfill').style.width = pct + '%';
+    document.querySelector('.pbar').setAttribute('aria-valuenow', String(Math.round(pct)));
+  }
+
+  function startProgress() {
+    const t0 = Date.now();
+    $('progress').hidden = false;
+    setProgress(2);
+    clearInterval(progTimer);
+    progTimer = setInterval(function () {
+      const s = (Date.now() - t0) / 1000;
+      setProgress(Math.min(94, 2 + 92 * (1 - Math.exp(-s / 9))));
+      let label = STEPS[0][1];
+      STEPS.forEach(function (st) { if (s >= st[0]) label = st[1]; });
+      if ($('pstep').textContent !== label) $('pstep').textContent = label;
+    }, 250);
+  }
+
+  function stopProgress(ok) {
+    clearInterval(progTimer);
+    if (ok) { setProgress(100); $('pstep').textContent = 'Concluído!'; }
+    else { $('progress').hidden = true; setProgress(0); }
+  }
 
   // ---------- Test mode (turn off in config.js) ----------
   $('fillTest').addEventListener('click', function () {
