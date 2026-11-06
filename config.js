@@ -9,3 +9,6 @@ window.TERMO_CONFIG = {
   // O teu e-mail para os testes (opcional). Atenção: este ficheiro é público no GitHub.
   EMAIL_TESTE: 'gabriel.goncalves@guinanos.com'
 };
+
+
+
